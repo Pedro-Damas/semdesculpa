@@ -1,0 +1,686 @@
+/* Sem Desculpa: a pista no topo, o número de peito descendo para o chão claro, blocos brancos
+   com um fato por linha. As cores e as medidas vêm do DESIGN.md do app. */
+
+@font-face {
+  font-family: "Sofia Sans Extra Condensed";
+  src: url("fontes/sofia-sans-extra-condensed-800.ttf") format("truetype");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Sofia Sans Extra Condensed";
+  src: url("fontes/sofia-sans-extra-condensed-900.ttf") format("truetype");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: light dark;
+
+  --pista: #1f3d7a;
+  --pista-funda: #16305f;
+  --arco: rgba(255, 255, 255, 0.09);
+  --texto-pista: #f4f6f8;
+  --texto-suave-pista: rgba(244, 246, 248, 0.8);
+  --texto-apagado-pista: rgba(244, 246, 248, 0.64);
+  --ladrilho-pista: rgba(255, 255, 255, 0.14);
+
+  --chao: #eef1f6;
+  --texto: #0e1116;
+  --texto-suave: #586171;
+  --texto-apagado: #6e7787;
+  --linha: rgba(14, 17, 22, 0.1);
+  --bloco: #ffffff;
+  --bloco-borda: rgba(15, 30, 61, 0.07);
+  --ladrilho: #e8eef9;
+  --ladrilho-icone: #1f3d7a;
+  --acento: #1f3d7a;
+
+  --tyvek: #fafaf7;
+  --tyvek-sombra: #c9ced6;
+  --tinta: #0e1116;
+  --tinta-suave: #4a5261;
+
+  --verde: #17733f;
+  --vermelho: #b8321f;
+
+  --sombra-bloco: 0 1px 2px rgba(15, 30, 61, 0.05), 0 6px 18px rgba(15, 30, 61, 0.06);
+  --sombra-papel: 0 2px 4px rgba(5, 12, 30, 0.2), 0 18px 40px rgba(5, 12, 30, 0.32);
+
+  --numeros: "Sofia Sans Extra Condensed", "Arial Narrow", sans-serif;
+  --texto-fonte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --pista: #0f1e3d;
+    --pista-funda: #091530;
+    --texto-pista: #e9edf3;
+    --texto-suave-pista: rgba(233, 237, 243, 0.78);
+    --texto-apagado-pista: rgba(233, 237, 243, 0.62);
+    --ladrilho-pista: rgba(255, 255, 255, 0.1);
+
+    --chao: #0a1328;
+    --texto: #e9edf3;
+    --texto-suave: rgba(233, 237, 243, 0.72);
+    --texto-apagado: rgba(233, 237, 243, 0.56);
+    --linha: rgba(233, 237, 243, 0.1);
+    --bloco: #131e39;
+    --bloco-borda: rgba(233, 237, 243, 0.06);
+    --ladrilho: rgba(201, 214, 240, 0.1);
+    --ladrilho-icone: #c9d6f0;
+    --acento: #afc3ea;
+
+    --tyvek: #e9eae5;
+    --tyvek-sombra: #bcc1c9;
+    --tinta-suave: #474f5d;
+
+    --sombra-bloco: none;
+    --sombra-papel: 0 2px 4px rgba(0, 0, 0, 0.3), 0 18px 40px rgba(0, 0, 0, 0.45);
+  }
+}
+
+/* ── Base ─────────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--chao);
+  color: var(--texto);
+  font: 400 17px/1.5 var(--texto-fonte);
+}
+
+img,
+svg {
+  display: block;
+}
+
+a {
+  color: var(--acento);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+.pista :focus-visible {
+  outline-color: var(--texto-pista);
+}
+
+.so-leitor {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.miolo {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.miolo.estreito {
+  max-width: 800px;
+}
+
+/* ── A pista (topo) ───────────────────────────────────────────────────── */
+
+.pista {
+  position: relative;
+  background: var(--pista);
+  color: var(--texto-pista);
+}
+
+/* Os arcos ficam presos na faixa; o número de peito, não (ele desce para o chão). */
+.arcos-caixa {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.pista::before {
+  /* o teto: a mesma cor por trás da barra do navegador no celular */
+  content: "";
+  position: absolute;
+  inset: -200px 0 auto;
+  height: 200px;
+  background: var(--pista);
+}
+
+.arcos {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(640px, 120vw);
+  height: auto;
+  color: var(--arco);
+  pointer-events: none;
+}
+
+.barra {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 72px;
+  padding-top: 12px;
+}
+
+.marca {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--texto-pista);
+  text-decoration: none;
+  font: 800 28px/1 var(--numeros);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.marca img {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+}
+
+.barra nav {
+  display: flex;
+  gap: 4px;
+}
+
+.barra nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 999px;
+  color: var(--texto-pista);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.barra nav a:hover {
+  background: var(--ladrilho-pista);
+}
+
+@media (max-width: 600px) {
+  /* no celular, os links ficam no rodapé e a marca respira */
+  .barra nav {
+    display: none;
+  }
+}
+
+/* ── O começo da página inicial ───────────────────────────────────────── */
+
+.heroi {
+  position: relative;
+  display: grid;
+  gap: 36px;
+  padding-top: 36px;
+}
+
+.heroi h1 {
+  margin: 0 0 16px;
+  max-width: 15ch;
+  font-size: clamp(34px, 6.4vw, 56px);
+  line-height: 1.06;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.chamada {
+  margin: 0;
+  max-width: 44ch;
+  color: var(--texto-suave-pista);
+  font-size: clamp(17px, 2.1vw, 20px);
+  line-height: 1.5;
+}
+
+.disponivel {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 24px 0 0;
+  padding: 8px 14px 8px 10px;
+  border-radius: 999px;
+  background: var(--ladrilho-pista);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.disponivel svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* O número de peito: papel Tyvek, quatro furos, picote e canhoto com o valor em jogo.
+   Ele desce da faixa azul: os furos de cima mostram a pista; os de baixo, o chão. */
+
+.bib {
+  position: relative;
+  justify-self: center;
+  width: min(100%, 330px);
+  margin: 0 0 -92px;
+  border-radius: 10px;
+  background: var(--tyvek);
+  color: var(--tinta);
+  box-shadow: var(--sombra-papel);
+  animation: desce 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.furo {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: inset 0 1px 1.5px rgba(5, 12, 30, 0.45);
+}
+
+.furo.cima {
+  top: 11px;
+  background: var(--pista-funda);
+}
+
+.furo.baixo {
+  bottom: 11px;
+  background: var(--chao);
+}
+
+.furo.esq {
+  left: 11px;
+}
+
+.furo.dir {
+  right: 11px;
+}
+
+.bib-corpo {
+  padding: 30px 24px 16px;
+  text-align: center;
+}
+
+.bib-dia,
+.bib-atividade {
+  margin: 0;
+  color: var(--tinta-suave);
+  font-size: 15px;
+  line-height: 20px;
+}
+
+.bib-dia {
+  font-weight: 600;
+}
+
+.bib-hora {
+  margin: 4px 0 6px;
+  font: 900 104px/0.92 var(--numeros);
+  letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+}
+
+.bib-picote {
+  margin: 0 12px;
+  border-top: 1.5px dashed var(--tyvek-sombra);
+}
+
+.bib-canhoto {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 24px 26px;
+}
+
+.bib-valor {
+  font: 800 34px/1 var(--numeros);
+  font-variant-numeric: tabular-nums;
+}
+
+.bib-rotulo {
+  color: var(--tinta-suave);
+  font-size: 15px;
+}
+
+@keyframes desce {
+  from {
+    opacity: 0;
+    transform: translateY(-28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bib {
+    animation: none;
+  }
+}
+
+@media (min-width: 880px) {
+  .heroi {
+    grid-template-columns: minmax(0, 1fr) 330px;
+    align-items: end;
+    gap: 64px;
+    padding-top: 64px;
+  }
+
+  .heroi-texto {
+    padding-bottom: 76px;
+  }
+}
+
+/* ── O topo das páginas de texto (termos e privacidade) ──────────────── */
+
+.titulo-pagina {
+  position: relative;
+  padding-top: 28px;
+  padding-bottom: 40px;
+}
+
+.titulo-pagina h1 {
+  margin: 0 0 8px;
+  font-size: clamp(30px, 5vw, 40px);
+  line-height: 1.1;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
+.titulo-pagina p {
+  margin: 0;
+  color: var(--texto-suave-pista);
+  font-size: 15px;
+}
+
+/* ── O chão ───────────────────────────────────────────────────────────── */
+
+main.miolo {
+  padding-top: 40px;
+  padding-bottom: 72px;
+}
+
+.inicio main.miolo {
+  padding-top: 148px;
+}
+
+.secao {
+  display: grid;
+  gap: 16px;
+  margin-top: 72px;
+  scroll-margin-top: 24px;
+}
+
+.secao:first-child {
+  margin-top: 0;
+}
+
+.secao h2 {
+  margin: 0 4px 6px;
+  font-size: 24px;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.secao .apoio {
+  margin: 0 4px;
+  max-width: 40ch;
+  color: var(--texto-suave);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+@media (min-width: 880px) {
+  .secao {
+    grid-template-columns: 300px minmax(0, 1fr);
+    gap: 48px;
+    align-items: start;
+  }
+
+  .secao-titulo {
+    position: sticky;
+    top: 28px;
+  }
+}
+
+/* Blocos: um assunto por bloco, um fato por linha, cada linha com o quadradinho do ícone. */
+
+.bloco {
+  margin: 0;
+  border: 1px solid var(--bloco-borda);
+  border-radius: 16px;
+  background: var(--bloco);
+  box-shadow: var(--sombra-bloco);
+}
+
+.blocos {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 640px) {
+  .blocos.lado-a-lado {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
+.cabeca-bloco {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-bottom: 1px solid var(--linha);
+}
+
+.cabeca-bloco h3 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 23px;
+  font-weight: 700;
+}
+
+.cabeca-bloco p {
+  margin: 1px 0 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+  line-height: 19px;
+}
+
+.linhas {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.linha {
+  position: relative;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  min-height: 64px;
+  padding: 12px 16px;
+}
+
+.linha + .linha::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 72px;
+  right: 0;
+  border-top: 1px solid var(--linha);
+}
+
+.ladrilho {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--ladrilho);
+  color: var(--ladrilho-icone);
+}
+
+.ladrilho svg {
+  width: 22px;
+  height: 22px;
+}
+
+.ladrilho.passo {
+  font: 800 24px/1 var(--numeros);
+  font-variant-numeric: tabular-nums;
+}
+
+.ladrilho.ganho {
+  background: var(--verde);
+  color: #fff;
+}
+
+.ladrilho.perda {
+  background: var(--vermelho);
+  color: #fff;
+}
+
+.fato {
+  margin: 0;
+  font-size: 16px;
+  line-height: 21px;
+  font-weight: 600;
+}
+
+.detalhe {
+  margin: 2px 0 0;
+  color: var(--texto-suave);
+  font-size: 14px;
+  line-height: 19px;
+}
+
+.valor {
+  font: 800 22px/1 var(--numeros);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.fatura {
+  white-space: nowrap;
+  font-weight: 600;
+  color: var(--texto);
+}
+
+.bloco .contato {
+  font-size: 17px;
+  word-break: break-word;
+}
+
+/* ── Texto corrido (termos e privacidade) ─────────────────────────────── */
+
+.texto {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 24px 28px 28px;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.texto h2 {
+  margin: 32px 0 8px;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 700;
+}
+
+.texto p,
+.texto ul {
+  margin: 0 0 12px;
+}
+
+.texto ul {
+  padding-left: 22px;
+}
+
+.texto li {
+  margin-bottom: 6px;
+}
+
+.texto blockquote {
+  margin: 12px 0 16px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--acento);
+  border-radius: 0 10px 10px 0;
+  background: var(--ladrilho);
+}
+
+.texto .aviso-texto {
+  color: var(--texto-suave);
+  font-size: 15px;
+}
+
+.voltar {
+  display: inline-flex;
+  margin: 0 0 20px 4px;
+  font-weight: 600;
+}
+
+@media (max-width: 560px) {
+  .texto {
+    padding: 20px;
+  }
+}
+
+/* ── Rodapé ───────────────────────────────────────────────────────────── */
+
+.rodape {
+  border-top: 1px solid var(--linha);
+  padding: 28px 0 40px;
+  color: var(--texto-suave);
+  font-size: 15px;
+}
+
+.rodape .miolo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 24px;
+}
+
+.rodape nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 20px;
+}
+
+.rodape p {
+  margin: 0;
+}
